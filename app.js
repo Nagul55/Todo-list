@@ -147,10 +147,19 @@
     refreshIcons();
   }
 
-  // Date Display
+  // Date & Header Subtitle Display
   function displayCurrentDate() {
-    const options = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
-    currentDateEl.textContent = new Date().toLocaleDateString(undefined, options);
+    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+    const dateStr = new Date().toLocaleDateString(undefined, options);
+    const total = tasks.length;
+    const completed = tasks.filter((t) => t.completed).length;
+    const pending = total - completed;
+
+    if (total === 0) {
+      currentDateEl.textContent = `${dateStr} • No tasks`;
+    } else {
+      currentDateEl.textContent = `${dateStr} • ${pending} pending, ${completed} done`;
+    }
   }
 
   // ==========================================
@@ -424,6 +433,7 @@
     completedCountEl.textContent = completed;
     pendingCountEl.textContent = pending;
     progressPercentEl.textContent = `${percent}%`;
+    displayCurrentDate();
 
     // Calculate ring stroke
     // Circumference = 2 * PI * 42 = 263.89
