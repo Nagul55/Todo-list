@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A sleek, modern, and feature-rich Todo List & Task Management application.">
+  <title>TaskFlow • Modern Todo App</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-icon">
+          <i data-lucide="check-circle-2"></i>
+        </div>
+        <div class="header-title-group">
+          <h1 class="app-title">TaskFlow</h1>
+          <p class="app-subtitle" id="current-date">Today's Focus</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="theme-toggle-btn" class="icon-btn" aria-label="Toggle Theme" title="Toggle Theme">
+          <i data-lucide="sun" class="sun-icon"></i>
+          <i data-lucide="moon" class="moon-icon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Dashboard / Stats Card -->
+    <section class="dashboard-card" aria-label="Task progress summary">
+      <div class="progress-info">
+        <span class="progress-label">Overall Progress</span>
+        <h2 class="progress-headline" id="progress-headline">Let's get things done!</h2>
+        <div class="stats-pills">
+          <span class="stat-pill"><i data-lucide="list-todo"></i> <b id="total-count">0</b> Total</span>
+          <span class="stat-pill"><i data-lucide="clock"></i> <b id="pending-count">0</b> Pending</span>
+          <span class="stat-pill"><i data-lucide="check-check"></i> <b id="completed-count">0</b> Done</span>
+        </div>
+      </div>
+      <div class="progress-ring-container">
+        <svg class="progress-ring" viewBox="0 0 100 100">
+          <circle class="progress-ring__bg" cx="50" cy="50" r="42"></circle>
+          <circle class="progress-ring__bar" id="progress-circle" cx="50" cy="50" r="42"></circle>
+        </svg>
+        <div class="progress-percentage">
+          <span id="progress-percent">0%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Task Input Section -->
+    <section class="task-form-card">
+      <form id="add-task-form">
+        <div class="input-main-row">
+          <div class="input-wrapper">
+            <i data-lucide="plus" class="input-icon"></i>
+            <input 
+              type="text" 
+              id="task-input" 
+              placeholder="What do you need to accomplish today?" 
+              autocomplete="off" 
+              required
+            >
+          </div>
+          <button type="submit" class="btn btn-primary" id="add-task-btn">
+            <span>Add Task</span>
+            <i data-lucide="arrow-right"></i>
+          </button>
+        </div>
+
+        <div class="input-options-row">
+          <div class="option-group">
+            <label for="task-category" class="option-label">
+              <i data-lucide="tag"></i> Category
+            </label>
+            <select id="task-category" class="select-control">
+              <option value="General">🏷️ General</option>
+              <option value="Work">💼 Work</option>
+              <option value="Personal">👤 Personal</option>
+              <option value="Study">📚 Study</option>
+              <option value="Shopping">🛒 Shopping</option>
+              <option value="Fitness">⚡ Fitness</option>
+            </select>
+          </div>
+
+          <div class="option-group">
+            <label for="task-priority" class="option-label">
+              <i data-lucide="flag"></i> Priority
+            </label>
+            <select id="task-priority" class="select-control">
+              <option value="low">🟢 Low</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
+
+          <div class="option-group">
+            <label for="task-due-date" class="option-label">
+              <i data-lucide="calendar"></i> Due Date
+            </label>
+            <input type="date" id="task-due-date" class="date-control">
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Filters and Search Toolbar -->
+    <section class="toolbar-section">
+      <div class="search-bar">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" id="search-input" placeholder="Search tasks..." autocomplete="off">
+        <button id="clear-search-btn" class="clear-search-btn hidden" aria-label="Clear Search">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="filter-sort-wrapper">
+        <!-- Status Filter Tabs -->
+        <div class="tabs-group" role="tablist">
+          <button class="tab-btn active" data-filter="all" role="tab" aria-selected="true">All</button>
+          <button class="tab-btn" data-filter="active" role="tab" aria-selected="false">Active</button>
+          <button class="tab-btn" data-filter="completed" role="tab" aria-selected="false">Completed</button>
+        </div>
+
+        <!-- Sort dropdown -->
+        <div class="sort-control-wrapper">
+          <label for="sort-select" class="sr-only">Sort Tasks</label>
+          <select id="sort-select" class="sort-select">
+            <option value="created-desc">Newest First</option>
+            <option value="created-asc">Oldest First</option>
+            <option value="due-asc">Due Date (Earliest)</option>
+            <option value="priority-desc">Priority (High to Low)</option>
+            <option value="alphabetical">Title (A - Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="category-pills-bar" id="category-pills-container">
+        <button class="pill-btn active" data-category="all">All Categories</button>
+        <button class="pill-btn" data-category="General">General</button>
+        <button class="pill-btn" data-category="Work">Work</button>
+        <button class="pill-btn" data-category="Personal">Personal</button>
+        <button class="pill-btn" data-category="Study">Study</button>
+        <button class="pill-btn" data-category="Shopping">Shopping</button>
+        <button class="pill-btn" data-category="Fitness">Fitness</button>
+      </div>
+    </section>
+
+    <!-- Task List Area -->
+    <main class="task-list-section">
+      <div class="list-header">
+        <h3 id="current-view-title">All Tasks</h3>
+        <div class="list-actions">
+          <button id="mark-all-btn" class="text-action-btn" title="Mark all filtered tasks as completed">
+            <i data-lucide="check-circle"></i> Complete All
+          </button>
+          <button id="clear-completed-btn" class="text-action-btn danger" title="Remove all completed tasks">
+            <i data-lucide="trash-2"></i> Clear Completed
+          </button>
+        </div>
+      </div>
+
+      <!-- Task items container -->
+      <ul id="task-list" class="task-list" aria-label="Tasks list">
+        <!-- Injected via JavaScript -->
+      </ul>
+
+      <!-- Empty State View -->
+      <div id="empty-state" class="empty-state hidden">
+        <div class="empty-icon-wrap">
+          <i data-lucide="sparkles"></i>
+        </div>
+        <h3 id="empty-title">All Caught Up!</h3>
+        <p id="empty-desc">No tasks in this view. Enjoy your free time or add a new goal above!</p>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>TaskFlow &bull; Stored locally in your browser</p>
+    </footer>
+  </div>
+
+  <!-- Edit Task Modal -->
+  <div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-title">Edit Task</h3>
+        <button id="close-modal-btn" class="icon-btn small" aria-label="Close modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form id="edit-task-form">
+        <input type="hidden" id="edit-task-id">
+        <div class="form-group">
+          <label for="edit-task-text">Task Title</label>
+          <input type="text" id="edit-task-text" class="input-control" required>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="edit-task-category">Category</label>
+            <select id="edit-task-category" class="select-control">
+              <option value="General">🏷️ General</option>
+              <option value="Work">💼 Work</option>
+              <option value="Personal">👤 Personal</option>
+              <option value="Study">📚 Study</option>
+              <option value="Shopping">🛒 Shopping</option>
+              <option value="Fitness">⚡ Fitness</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-task-priority">Priority</label>
+            <select id="edit-task-priority" class="select-control">
+              <option value="low">🟢 Low</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-task-due-date">Due Date</label>
+          <input type="date" id="edit-task-due-date" class="date-control">
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="cancel-modal-btn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Main JavaScript File -->
+  <script src="app.js"></script>
+</body>
+</html>
